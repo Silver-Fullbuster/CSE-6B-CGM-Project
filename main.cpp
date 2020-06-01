@@ -21,6 +21,7 @@ typedef struct paddle {
 
     int x, y;
     int w, h;
+    int dx;
 } paddle_t;
 
 // Program globals
@@ -51,15 +52,17 @@ static void init_game() {
     ball.dy = 1;
     ball.dx = 1 * (screen->w / 480);
 
-    paddle[0].x = 20;
+    paddle[0].x = 15;
     paddle[0].y = screen->h / 2 - 50;
-    paddle[0].w = 10;
+    paddle[0].w = 5;
     paddle[0].h = 50;
+    paddle[0].dx = 0;
 
-    paddle[1].x = screen->w - 20 - 10;
+    paddle[1].x = screen->w - 15 - 10;
     paddle[1].y = screen->h / 2 - 50;
-    paddle[1].w = 10;
+    paddle[1].w = 5;
     paddle[1].h = 50;
+    paddle[1].dx = 0;
 }
 
 int check_score() {
@@ -94,37 +97,37 @@ int check_score() {
 }
 
 //if return value is 1 collision occurred. if return is 0, no collision.
-int check_collision(ball_t a, paddle_t b) {
+int check_collision(ball_t ball, paddle_t paddle) {
 
-    int left_a, left_b;
-    int right_a, right_b;
-    int top_a, top_b;
-    int bottom_a, bottom_b;
+    int ballLeft, paddleLeft;
+    int ballRight, paddleRight;
+    int ballTop, paddleTop;
+    int ballBottom, paddleBottom;
 
-    left_a = a.x;
-    right_a = a.x + a.w;
-    top_a = a.y;
-    bottom_a = a.y + a.h;
+    ballLeft = ball.x;
+    ballRight = ball.x + ball.w;
+    ballTop = ball.y;
+    ballBottom = ball.y + ball.h;
 
-    left_b = b.x;
-    right_b = b.x + b.w;
-    top_b = b.y;
-    bottom_b = b.y + b.h;
+    paddleLeft = paddle.x;
+    paddleRight = paddle.x + paddle.w;
+    paddleTop = paddle.y;
+    paddleBottom = paddle.y + paddle.h;
 
 
-    if (left_a > right_b) {
+    if (ballLeft > paddleRight) {
         return 0;
     }
 
-    if (right_a < left_b) {
+    if (ballRight < paddleLeft) {
         return 0;
     }
 
-    if (top_a > bottom_b) {
+    if (ballTop > paddleBottom) {
         return 0;
     }
 
-    if (bottom_a < top_b) {
+    if (ballBottom < paddleTop) {
         return 0;
     }
 
@@ -138,7 +141,7 @@ static void move_ball() {
     ball.x += ball.dx;
     ball.y += ball.dy;
 
-    /* Turn the ball around if it hits the edge of the screen. */
+    /* the ball around if it hits the edge of the screen. */
     if (ball.x < 0) {
 
         score[1] += 1;
@@ -166,15 +169,20 @@ static void move_ball() {
         //collision detected
         if (c == 1) {
 
+
             //ball moving left
             if (ball.dx < 0) {
 
                 ball.dx -= 1;
-
-                //ball moving right
+                ball.x = paddle[0].x + paddle[0].w + 1;
+                //ball moving right and paddle hitting head-on
+            } else if (paddle[1].dx <= 0) {
+                ball.dx += 1 - paddle[1].dx;
+                ball.x = paddle[1].x - ball.w - 1 - paddle[1].dx;
             } else {
-
-                ball.dx += 1;
+                ball.dx += paddle[1].dx;
+                ball.x = paddle[1].x + paddle[1].w + paddle[1].dx + 1;
+                ball.dx = -ball.dx;
             }
 
             //change ball direction
@@ -185,57 +193,22 @@ static void move_ball() {
 
             if (hit_pos >= 0 && hit_pos < 7) {
                 ball.dy = 4;
-            }
-
-            if (hit_pos >= 7 && hit_pos < 14) {
+            } else if (hit_pos >= 7 && hit_pos < 14) {
                 ball.dy = 3;
-            }
-
-            if (hit_pos >= 14 && hit_pos < 21) {
+            } else if (hit_pos >= 14 && hit_pos < 21) {
                 ball.dy = 2;
-            }
-
-            if (hit_pos >= 21 && hit_pos < 28) {
+            } else if (hit_pos >= 21 && hit_pos < 28) {
                 ball.dy = 1;
-            }
-
-            if (hit_pos >= 28 && hit_pos < 32) {
+            } else if (hit_pos >= 28 && hit_pos < 32) {
                 ball.dy = 0;
-            }
-
-            if (hit_pos >= 32 && hit_pos < 39) {
+            } else if (hit_pos >= 32 && hit_pos < 39) {
                 ball.dy = -1;
-            }
-
-            if (hit_pos >= 39 && hit_pos < 46) {
+            } else if (hit_pos >= 39 && hit_pos < 46) {
                 ball.dy = -2;
-            }
-
-            if (hit_pos >= 46 && hit_pos < 53) {
+            } else if (hit_pos >= 46 && hit_pos < 53) {
                 ball.dy = -3;
-            }
-
-            if (hit_pos >= 53 && hit_pos <= 60) {
+            } else if (hit_pos >= 53 && hit_pos <= 60) {
                 ball.dy = -4;
-            }
-
-            //ball moving right
-            if (ball.dx > 0) {
-
-                //teleport ball to avoid mutli collision glitch
-                if (ball.x < 30) {
-
-                    ball.x = 30;
-                }
-
-                //ball moving left
-            } else {
-
-                //teleport ball to avoid mutli collision glitch
-                if (ball.x > screen->w - 40) {
-
-                    ball.x = screen->w - 40;
-                }
             }
         }
     }
@@ -309,32 +282,46 @@ static void move_paddle_ai() {
     }
 }
 
-static void move_paddle(int d) {
-
-    // if the down arrow is pressed move paddle down
-    if (d == 0) {
-
-        if (paddle[1].y >= screen->h - paddle[1].h) {
-
-            paddle[1].y = screen->h - paddle[1].h;
-
-        } else {
-
-            paddle[1].y += 5;
-        }
+static void move_paddle(int d, int l) {
+    switch (d) {
+        case 1:
+            // if the down arrow is pressed move paddle down
+            if (paddle[1].y >= screen->h - paddle[1].h)
+                paddle[1].y = screen->h - paddle[1].h;
+            else
+                paddle[1].y += 5;
+            break;
+        case -1:
+            // if the up arrow is pressed move paddle down
+            if (paddle[1].y <= 0)
+                paddle[1].y = 0;
+            else
+                paddle[1].y -= 5;
+        default:
+            break;
     }
-
-    // if the up arrow is pressed move paddle up
-    if (d == 1) {
-
-        if (paddle[1].y <= 0) {
-
-            paddle[1].y = 0;
-
-        } else {
-
-            paddle[1].y -= 5;
-        }
+    switch (l) {
+        case -1:
+            // if the right arrow is pressed move paddle right
+            if (paddle[1].x >= screen->w - paddle[1].w - 10)
+                paddle[1].x = screen->w - paddle[1].w - 10;
+            else {
+                paddle[1].x += 5;
+                paddle[1].dx = 5;
+            }
+            break;
+        case 1:
+            // if the left arrow is pressed move paddle left
+            if (paddle[1].x <= screen->w / 2 + 10)
+                paddle[1].x = screen->w / 2 + 10;
+            else {
+                paddle[1].x -= 5;
+                paddle[1].dx = -5;
+            }
+            break;
+        default:
+            paddle[1].dx = 0;
+            break;
     }
 }
 
@@ -551,21 +538,17 @@ int main(int argc, char *args[]) {
         SDL_PumpEvents();
 
         const Uint8 *keystate = SDL_GetKeyboardState(NULL);
+        int d = keystate[SDL_SCANCODE_DOWN] - keystate[SDL_SCANCODE_UP],
+                l = keystate[SDL_SCANCODE_LEFT] - keystate[SDL_SCANCODE_RIGHT];
 
         if (keystate[SDL_SCANCODE_ESCAPE]) {
-
             quit = 1;
         }
 
-        if (keystate[SDL_SCANCODE_DOWN]) {
-
-            move_paddle(0);
+        if (d || l) {
+            move_paddle(d, l);
         }
 
-        if (keystate[SDL_SCANCODE_UP]) {
-
-            move_paddle(1);
-        }
 
         //draw background
         SDL_RenderClear(renderer);
@@ -771,6 +754,7 @@ int init(int width, int height, int argc, char *args[]) {
     Uint32 colorkey = SDL_MapRGB(title->format, 255, 0, 255);
     SDL_SetColorKey(title, SDL_TRUE, colorkey);
     SDL_SetColorKey(numbermap, SDL_TRUE, colorkey);
+    SDL_SetColorKey(end, SDL_TRUE, colorkey);
 
     return 0;
 }
