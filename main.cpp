@@ -136,6 +136,8 @@ int check_collision(ball_t ball, paddle_t paddle) {
 
 /* This routine moves each ball by its motion vector. */
 static void move_ball() {
+    if (ball.dx > 10)
+        ball.dx = 10;
 
     /* Move the ball by its motion vector. */
     ball.x += ball.dx;
@@ -168,25 +170,21 @@ static void move_ball() {
 
         //collision detected
         if (c == 1) {
-
-
-            //ball moving left
-            if (ball.dx < 0) {
-
+            //ball on left side
+            if (ball.x < screen->w / 2) {
                 ball.dx -= 1;
                 ball.x = paddle[0].x + paddle[0].w + 1;
-                //ball moving right and paddle hitting head-on
-            } else if (paddle[1].dx <= 0) {
-                ball.dx += 1 - paddle[1].dx;
-                ball.x = paddle[1].x - ball.w - 1 - paddle[1].dx;
+                ball.dx *= -1;
+                //ball on right side and paddle hitting head-on
+            } else if (paddle[1].dx <= 0 && ball.x < paddle[1].x + (paddle[1].w / 2)) {
+                ball.dx *= ball.dx > 0 ? -1 : 1;
+                ball.dx += paddle[1].dx - 1;
+                ball.x = paddle[1].x - ball.w - 1 + paddle[1].dx;
             } else {
-                ball.dx += paddle[1].dx;
+                ball.dx *= ball.dx < 0 ? -1 : 1;
+                ball.dx += paddle[1].dx + 1;
                 ball.x = paddle[1].x + paddle[1].w + paddle[1].dx + 1;
-                ball.dx = -ball.dx;
             }
-
-            //change ball direction
-            ball.dx = -ball.dx;
 
             //change ball angle based on where on the paddle it hit
             int hit_pos = (paddle[i].y + paddle[i].h) - ball.y;
@@ -303,18 +301,20 @@ static void move_paddle(int d, int l) {
     switch (l) {
         case -1:
             // if the right arrow is pressed move paddle right
-            if (paddle[1].x >= screen->w - paddle[1].w - 10)
+            if (paddle[1].x >= screen->w - paddle[1].w - 10) {
                 paddle[1].x = screen->w - paddle[1].w - 10;
-            else {
+                paddle[1].dx = 0;
+            } else {
                 paddle[1].x += 5;
                 paddle[1].dx = 5;
             }
             break;
         case 1:
             // if the left arrow is pressed move paddle left
-            if (paddle[1].x <= screen->w / 2 + 10)
+            if (paddle[1].x <= screen->w / 2 + 10) {
                 paddle[1].x = screen->w / 2 + 10;
-            else {
+                paddle[1].dx = 0;
+            } else {
                 paddle[1].x -= 5;
                 paddle[1].dx = -5;
             }
@@ -547,6 +547,8 @@ int main(int argc, char *args[]) {
 
         if (d || l) {
             move_paddle(d, l);
+        } else {
+            paddle[1].dx = 0;
         }
 
 
