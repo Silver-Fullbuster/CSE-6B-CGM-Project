@@ -49,7 +49,7 @@ static void init_game() {
     ball.w = 10;
     ball.h = 10;
     ball.dy = 1;
-    ball.dx = 1 * (screen->w/480);
+    ball.dx = 1 * (screen->w / 480);
 
     paddle[0].x = 20;
     paddle[0].y = screen->h / 2 - 50;
@@ -420,15 +420,15 @@ static void draw_net() {
 
     SDL_Rect net;
 
-    net.w = 5;
-    net.h = 15;
+    net.w = 3;
+    net.h = 30;
     net.x = screen->w / 2 - (net.w / 2);
-    net.y = 20;
+    net.y = -5;
 
     //draw the net
     int i, r;
 
-    while (net.y + net.h < screen->h) {
+    while (net.y < screen->h) {
 
         r = SDL_FillRect(screen, &net, SDL_MapRGB(screen->format, 127, 185, 4));
 
@@ -437,7 +437,7 @@ static void draw_net() {
             printf("fill rectangle faliled in func draw_net()");
         }
 
-        net.y = net.y + 30;
+        net.y = net.y + net.h + 8;
     }
 }
 
@@ -693,7 +693,8 @@ int init(int width, int height, int argc, char *args[]) {
         //Create window
         if (strcmp(args[i], "-f")) {
 
-            SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN, &window, &renderer);
+            window = SDL_CreateWindow("Pong - a CG project by Mehul and Charishma", SDL_WINDOWPOS_UNDEFINED,
+                                      SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 
         } else {
             SDL_DisplayMode displayMode;
@@ -701,8 +702,12 @@ int init(int width, int height, int argc, char *args[]) {
             width = SCREEN_WIDTH = displayMode.w;
             height = SCREEN_HEIGHT = displayMode.h;
 
-            SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_FULLSCREEN_DESKTOP, &window, &renderer);
+            window = SDL_CreateWindow("Pong - a CG project by Mehul and Charishma", SDL_WINDOWPOS_UNDEFINED,
+                                      SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
+                                      SDL_WINDOW_FULLSCREEN_DESKTOP);
         }
+        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
     }
 
     if (window == NULL) {
