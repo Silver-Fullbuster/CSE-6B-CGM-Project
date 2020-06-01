@@ -1,7 +1,6 @@
 
 //Using libs SDL, glibc
 #include "SDL2/SDL.h"    //SDL version 2.0
-#include <stdlib.h>
 #include <cstdio>
 
 int SCREEN_WIDTH = 640;    //window height
@@ -431,7 +430,7 @@ static void draw_net() {
 
     while (net.y + net.h < screen->h) {
 
-        r = SDL_FillRect(screen, &net, 0xffffffff);
+        r = SDL_FillRect(screen, &net, SDL_MapRGB(screen->format, 56, 56, 56));
 
         if (r != 0) {
 
@@ -451,7 +450,7 @@ static void draw_ball() {
     src.w = ball.w;
     src.h = ball.h;
 
-    int r = SDL_FillRect(screen, &src, 0xffffffff);
+    int r = SDL_FillRect(screen, &src, SDL_MapRGB(screen->format, 225, 225, 225));
 
     if (r != 0) {
 
@@ -471,7 +470,7 @@ static void draw_paddle() {
         src.w = paddle[i].w;
         src.h = paddle[i].h;
 
-        int r = SDL_FillRect(screen, &src, 0xffffffff);
+        int r = SDL_FillRect(screen, &src, SDL_MapRGB(screen->format, 225, 225, 225));
 
         if (r != 0) {
 
@@ -570,7 +569,7 @@ int main(int argc, char *args[]) {
 
         //draw background
         SDL_RenderClear(renderer);
-        SDL_FillRect(screen, NULL, 0x000000ff);
+        SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 31, 31, 31));
 
         //display main menu
         if (state == 0) {
