@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <cstdio>
 
-#define SCREEN_WIDTH 1280    //window height
-#define SCREEN_HEIGHT 720    //window width
+int SCREEN_WIDTH = 640;    //window height
+int SCREEN_HEIGHT = 480;   //window width
 
 //function prototypes
 //initilise SDL
@@ -27,7 +27,7 @@ typedef struct paddle {
 // Program globals
 static ball_t ball;
 static paddle_t paddle[2];
-int score[] = {2, 2};
+int score[] = {0, 0};
 int width, height;        //used if fullscreen
 
 SDL_Window *window = NULL;    //The window we'll be rendering to
@@ -378,7 +378,6 @@ static void draw_game_over(int p) {
         default:
             SDL_BlitSurface(end, &cpu, screen, &dest);
     }
-
 }
 
 static void draw_menu() {
@@ -698,6 +697,10 @@ int init(int width, int height, int argc, char *args[]) {
             SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN, &window, &renderer);
 
         } else {
+            SDL_DisplayMode displayMode;
+            SDL_GetCurrentDisplayMode(0, &displayMode);
+            width = SCREEN_WIDTH = displayMode.w;
+            height = SCREEN_HEIGHT = displayMode.h;
 
             SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_FULLSCREEN_DESKTOP, &window, &renderer);
         }
