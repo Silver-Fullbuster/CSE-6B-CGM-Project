@@ -49,7 +49,7 @@ static void init_game() {
     ball.w = 10;
     ball.h = 10;
     ball.dy = 1;
-    ball.dx = 1;
+    ball.dx = 1 * (screen->w/480);
 
     paddle[0].x = 20;
     paddle[0].y = screen->h / 2 - 50;
@@ -430,7 +430,7 @@ static void draw_net() {
 
     while (net.y + net.h < screen->h) {
 
-        r = SDL_FillRect(screen, &net, SDL_MapRGB(screen->format, 56, 56, 56));
+        r = SDL_FillRect(screen, &net, SDL_MapRGB(screen->format, 127, 185, 4));
 
         if (r != 0) {
 
@@ -470,7 +470,7 @@ static void draw_paddle() {
         src.w = paddle[i].w;
         src.h = paddle[i].h;
 
-        int r = SDL_FillRect(screen, &src, SDL_MapRGB(screen->format, 225, 225, 225));
+        int r = SDL_FillRect(screen, &src, SDL_MapRGB(screen->format, 255, 255, 255));
 
         if (r != 0) {
 
@@ -569,7 +569,7 @@ int main(int argc, char *args[]) {
 
         //draw background
         SDL_RenderClear(renderer);
-        SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 31, 31, 31));
+        SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 61, 51, 51));
 
         //display main menu
         if (state == 0) {
