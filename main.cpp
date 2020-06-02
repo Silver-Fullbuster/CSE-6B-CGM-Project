@@ -633,12 +633,14 @@ int main(int argc, char *args[]) {
         SDL_RenderPresent(renderer);
 
         //time it takes to render  frame in milliseconds
-        next_game_tick += 1000 / 60;
-        sleep = next_game_tick - SDL_GetTicks();
+        if (SDL_GetWindowFlags(window) != SDL_WINDOW_FULLSCREEN) {
+            next_game_tick += 1000 / 60;
+            sleep = next_game_tick - SDL_GetTicks();
 
-        if (sleep >= 0) {
+            if (sleep >= 0) {
 
-            SDL_Delay(sleep);
+                SDL_Delay(sleep);
+            }
         }
     }
 
