@@ -176,7 +176,7 @@ static void move_ball() {
                 ball.x = paddle[0].x + paddle[0].w + 1;
                 ball.dx *= -1;
                 //ball on right side and paddle hitting head-on
-            } else if (paddle[1].dx <= 0 && ball.x < paddle[1].x + (paddle[1].w / 2)) {
+            } else if (ball.x < paddle[1].x + (paddle[1].w / 2)) {
                 ball.dx *= ball.dx > 0 ? -1 : 1;
                 ball.dx += paddle[1].dx - 1;
                 ball.x = paddle[1].x - ball.w - 1 + paddle[1].dx;
